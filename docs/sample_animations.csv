@@ -1,0 +1,5 @@
+Index,Name,StartFrame,EndFrame,FrameCount,FPS,Duration,Loop,SourceFilename
+0,Idle,0,59,60,30,2,True,AN_Club_Idle.fbx
+1,Dance_A,60,149,90,30,3,True,AN_Club_Dance_A.fbx
+2,Dance_B,150,229,80,30,2.666667,True,AN_Club_Dance_B.fbx
+3,Jump,230,259,30,30,0.9667,False,AN_Club_Jump.fbx

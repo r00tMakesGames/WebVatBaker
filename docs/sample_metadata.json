@@ -1,0 +1,115 @@
+{
+    "version": 1,
+    "generator": "VAT Baker 1.0",
+    "generatedAt": "2026-08-23T00:00:00.000Z",
+    "asset": "Club_Male01",
+    "vertexCount": 6842,
+    "totalFrames": 260,
+    "bakeFPS": 30,
+    "positionMode": "offset",
+    "axisConversion": "none",
+    "unitScale": 1,
+    "texture": {
+        "width": 4096,
+        "height": 435,
+        "format": "RGBA16F",
+        "addressing": "linear",
+        "address": "linearSample = globalFrame * vertexCount + vertexIndex; x = linearSample % width; y = floor(linearSample / width)",
+        "unusedTexels": 2840
+    },
+    "lookup": {
+        "attribute": "TEXCOORD_1",
+        "split": 1024,
+        "decode": "vertexIndex = round(uv1.x) + round(uv1.y) * 1024"
+    },
+    "normals": {
+        "baked": true,
+        "encoding": "unit-length object-space normal stored raw in RGB, range -1..1, alpha 1. Not offset-encoded even when positionMode is offset."
+    },
+    "animationLookupTexture": {
+        "width": 4,
+        "height": 1,
+        "format": "RGBA32F",
+        "channels": "R=StartFrame G=FrameCount B=FPS A=Flags(bit0=loop)"
+    },
+    "bounds": {
+        "min": [
+            -63.221,
+            -41.187,
+            0
+        ],
+        "max": [
+            62.884,
+            43.112,
+            184.244
+        ],
+        "size": [
+            126.105,
+            84.299,
+            184.244
+        ]
+    },
+    "storedValueRange": {
+        "min": [
+            -38.902,
+            -22.457,
+            -19.884
+        ],
+        "max": [
+            39.114,
+            24.006,
+            21.337
+        ],
+        "size": [
+            78.016,
+            46.463,
+            41.221
+        ]
+    },
+    "animations": [
+        {
+            "index": 0,
+            "name": "Idle",
+            "startFrame": 0,
+            "endFrame": 59,
+            "frameCount": 60,
+            "fps": 30,
+            "duration": 2,
+            "loop": true,
+            "sourceFilename": "AN_Club_Idle.fbx"
+        },
+        {
+            "index": 1,
+            "name": "Dance_A",
+            "startFrame": 60,
+            "endFrame": 149,
+            "frameCount": 90,
+            "fps": 30,
+            "duration": 3,
+            "loop": true,
+            "sourceFilename": "AN_Club_Dance_A.fbx"
+        },
+        {
+            "index": 2,
+            "name": "Dance_B",
+            "startFrame": 150,
+            "endFrame": 229,
+            "frameCount": 80,
+            "fps": 30,
+            "duration": 2.666667,
+            "loop": true,
+            "sourceFilename": "AN_Club_Dance_B.fbx"
+        },
+        {
+            "index": 3,
+            "name": "Jump",
+            "startFrame": 230,
+            "endFrame": 259,
+            "frameCount": 30,
+            "fps": 30,
+            "duration": 0.9667,
+            "loop": false,
+            "sourceFilename": "AN_Club_Jump.fbx"
+        }
+    ]
+}
