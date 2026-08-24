@@ -1,7 +1,6 @@
 # VAT Baker
 
-Bakes skeletal FBX animation into Vertex Animation Textures in the browser. No
-backend, no upload — the FBX files never leave the machine.
+Bakes skeletal FBX animation into Vertex Animation Textures in the browser.
 
 Built for Unreal Engine static-mesh VAT playback and Niagara GPU crowds, but the
 format itself is engine-independent and fully documented.
