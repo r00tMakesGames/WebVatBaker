@@ -345,7 +345,21 @@ export function makeDataTexture(
   width: number,
   height: number,
 ): THREE.DataTexture {
-  const tex = new THREE.DataTexture(data, width, height, THREE.RGBAFormat, THREE.FloatType);
+  // TypeScript 5.7 made TypedArrays generic over their backing buffer, so a
+  // plain `Float32Array` widens to `Float32Array<ArrayBufferLike>` and no longer
+  // matches the DOM's `BufferSource` (`ArrayBufferView<ArrayBuffer>`), which is
+  // what DataTexture asks for. These arrays are always ArrayBuffer-backed — we
+  // allocate them ourselves and never touch SharedArrayBuffer — so the cast
+  // states a fact the compiler lost rather than papering over a real mismatch.
+  // Doing it here keeps the project compiling on both TS 5.6 and 5.7+ instead of
+  // pinning the toolchain to an old version.
+  const tex = new THREE.DataTexture(
+    data as unknown as BufferSource,
+    width,
+    height,
+    THREE.RGBAFormat,
+    THREE.FloatType,
+  );
   tex.minFilter = THREE.NearestFilter;
   tex.magFilter = THREE.NearestFilter;
   tex.wrapS = THREE.ClampToEdgeWrapping;
