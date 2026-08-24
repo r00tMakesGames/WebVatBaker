@@ -34,7 +34,7 @@ import {
   type StaticMeshBuild,
 } from '../vat/MeshExporter';
 import { buildMetadata, metadataToCSV, metadataToJSON } from '../vat/VATMetadata';
-import { gltfToUnreal, writeEXR } from '../vat/EXRWriter';
+import { gltfToUnreal, quatGltfToUnreal, writeEXR } from '../vat/EXRWriter';
 import { reportToText, validatePostBake, validatePreBake, type ValidationReport } from '../vat/Validation';
 import { assetLeadToken, deriveAnimationName, deriveAssetName, outputNames, splitList } from '../vat/naming';
 import type {
@@ -604,18 +604,17 @@ export function exportPositionEXR(): void {
 export function exportBoneRotationEXR(): void {
   const result = appStore.get().result;
   if (!result?.bone) return;
-  // Quaternion components are not coordinates in the sense the axis swizzle
-  // handles, so the conversion is applied to the ROTATION rather than to the
-  // channel order. Bake with axisConversion = none and swizzle in the material,
-  // or handle the basis change engine-side; converting a quaternion by
-  // reordering its channels would silently produce a mirrored rotation.
+  // A quaternion's basis change is a conjugation, not a channel reorder. Using
+  // the position conversion here would yield a mirrored rotation that still
+  // animates plausibly, which is the worst kind of wrong.
   const buffer = writeEXR(
     result.bone.rotations,
     result.layout.width,
     result.layout.height,
     {
       pixelType: result.settings.precision === 'RGBA16F' ? 'half' : 'float',
-      transform: null,
+      transform:
+        result.settings.axisConversion === 'gltf_to_unreal' ? quatGltfToUnreal : null,
     },
   );
   downloadBlob(buffer, names().boneRotation, 'image/x-exr');

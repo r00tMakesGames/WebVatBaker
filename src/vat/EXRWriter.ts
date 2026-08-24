@@ -83,8 +83,14 @@ const SOURCE_OFFSET = [3, 2, 1, 0];
 
 export interface EXRWriteOptions {
   pixelType: EXRPixelType;
-  /** Optional per-component linear transform applied on write (axis conversion). */
-  transform?: ((x: number, y: number, z: number, out: Float32Array) => void) | null;
+  /**
+   * Optional per-texel transform applied on write (axis conversion). Receives
+   * all four channels and writes four, because a quaternion's basis change
+   * involves W and cannot be expressed as an XYZ-only operation.
+   */
+  transform?:
+    | ((x: number, y: number, z: number, w: number, out: Float32Array) => void)
+    | null;
 }
 
 /**
@@ -177,7 +183,7 @@ export function writeEXR(
 
   // ---- scanlines ----------------------------------------------------------
   const xf = options.transform ?? null;
-  const tmp = new Float32Array(3);
+  const tmp = new Float32Array(4);
   let write = headerBytes + offsetTableBytes;
 
   for (let y = 0; y < height; y++) {
@@ -194,7 +200,7 @@ export function writeEXR(
       row = _scratchRow(width);
       for (let x = 0; x < width; x++) {
         const s = rowBase + x * 4;
-        xf(rgba[s], rgba[s + 1], rgba[s + 2], tmp);
+        xf(rgba[s], rgba[s + 1], rgba[s + 2], rgba[s + 3], tmp);
         const d = x * 4;
         row[d] = tmp[0];
         row[d + 1] = tmp[1];
@@ -230,9 +236,53 @@ function _scratchRow(width: number): Float32Array {
   return _scratch;
 }
 
-/** glTF/Three (Y-up, RH) -> Unreal (Z-up, LH). Matches the UE glTF importer basis. */
-export function gltfToUnreal(x: number, y: number, z: number, out: Float32Array) {
+/**
+ * glTF/Three (Y-up, right-handed) -> Unreal (Z-up, left-handed), matching the UE
+ * glTF importer basis:
+ *
+ *   C : (x, y, z) -> (-z, x, y)
+ *
+ * Note det(C) = -1. The basis change is a REFLECTION, not a rotation, which is
+ * the whole reason quaternions need separate handling below.
+ */
+export function gltfToUnreal(
+  x: number,
+  y: number,
+  z: number,
+  w: number,
+  out: Float32Array,
+) {
   out[0] = -z;
   out[1] = x;
   out[2] = y;
+  out[3] = w;
+}
+
+/**
+ * The same basis change applied to a ROTATION rather than to a point.
+ *
+ * Conjugating a rotation by an orthogonal matrix C gives
+ *
+ *   C · R(axis, theta) · C^-1  =  R( det(C) · C·axis , theta )
+ *
+ * The axis is an axial vector, so it picks up det(C). With det(C) = -1 the
+ * quaternion's vector part becomes -C·v, and the angle — hence W — is unchanged:
+ *
+ *   q = (x, y, z, w)  ->  (z, -x, -y, w)
+ *
+ * Reordering the components the same way as a position, (-z, x, y, w), would
+ * silently produce a MIRRORED rotation: the character would animate, plausibly,
+ * and wrongly. That failure mode is why this is a separate function.
+ */
+export function quatGltfToUnreal(
+  x: number,
+  y: number,
+  z: number,
+  w: number,
+  out: Float32Array,
+) {
+  out[0] = z;
+  out[1] = -x;
+  out[2] = -y;
+  out[3] = w;
 }

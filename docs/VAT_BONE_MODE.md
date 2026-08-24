@@ -228,12 +228,22 @@ Accumulate `w * quatRotate(rot, VertexNormalWS_or_local)` in the same loop.
 
 ### A note on axis conversion
 
-**Bake with `axisConversion = none` when using bone mode.** The `glTF → Unreal`
-option pre-swizzles channel order, which is correct for positions but *wrong for
-quaternions* — reordering a quaternion's components produces a mirrored
-rotation, not a basis change. The rotation EXR is therefore written unconverted
-regardless of the setting, and the swizzle belongs in the material as shown
-above.
+`glTF → Unreal` now handles bone mode correctly. Positions convert by applying
+the basis matrix; rotations convert by **conjugation**, since a rotation axis is
+an axial vector and picks up `det(C) = -1`:
+
+```
+position:    (x, y, z)     ->  (-z,  x,  y)
+quaternion:  (x, y, z, w)  ->  ( z, -x, -y, w)
+```
+
+Applying the position swizzle to a quaternion yields a mirrored rotation that
+still animates plausibly — verified to diverge by up to 3.2 units at unit scale,
+while the conjugation reproduces the directly converted result exactly.
+
+Baking with the conversion on is the recommended path: it keeps the material
+free of basis handling entirely. See
+[UNREAL_BONE_MATERIAL.md](./UNREAL_BONE_MATERIAL.md).
 
 ---
 
